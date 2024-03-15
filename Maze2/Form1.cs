@@ -229,8 +229,10 @@ namespace Maze2
             SolidBrush wall = new SolidBrush(Color.Blue);
             SolidBrush dot = new SolidBrush(Color.White);
             SolidBrush pacman = new SolidBrush(Color.Yellow);
-            SolidBrush ghost = new SolidBrush(Color.Red);
-
+            SolidBrush blinky = new SolidBrush(Color.Red);
+            SolidBrush pinky = new SolidBrush(Color.Pink);
+            SolidBrush inky = new SolidBrush(Color.LightBlue);
+            SolidBrush clyde = new SolidBrush(Color.Orange);
             // Här tar vi ut data om vilket fönster vi ska
             // rita i. Den här metoden skulle kunna anropas av olika
             // fönster och då behöver man kunna hantera vilket fönster
@@ -295,29 +297,29 @@ namespace Maze2
                             _blockSize
                             );
                     }
-
-                    // Är det ett spöke?
-                    if (maze[j, i] == _ghost)
-                    {
-                        // Rita först en cirkel som täcker hela blockstorleken
-                        g.FillEllipse(
-                            ghost,
-                            i * _blockSize,
-                            j * _blockSize,
-                            _blockSize,
-                            _blockSize
-                            );
-
-                        // Rita sedan en rektangel på nedre halvan av blocket
-                        // Då blir det att påminna om ett spöke
-                        g.FillRectangle(
-                            ghost,
-                            i * _blockSize,
-                            j * _blockSize + _blockSize / 2,
-                            _blockSize,
-                            _blockSize / 2
-                            );
-                    }
+                }
+            }
+            for (int i = 0; i < ghosts.Count; i++)
+            {
+                if (i == 0)
+                {
+                    g.FillEllipse(blinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                    g.FillRectangle(blinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                }
+                if (i == 1)
+                {
+                    g.FillEllipse(pinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                    g.FillRectangle(pinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                }
+                if (i == 2)
+                {
+                    g.FillEllipse(inky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                    g.FillRectangle(inky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                }
+                if (i == 3)
+                {
+                    g.FillEllipse(clyde, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                    g.FillRectangle(clyde, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
                 }
             }
         }
@@ -376,8 +378,15 @@ namespace Maze2
         /// <param name="e">Data om händelsen (inget vi bryr oss i)</param>
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if ( numDots == 121 && ghosts.Count == 2)
+            {
+                AddGhost(9, 7 , _left, _empty, 9, 7);
+            }
+            if (numDots == 100 && ghosts.Count == 3)
+            {
+                AddGhost(9, 7, _left, _empty, 9, 7);
+            }
             // Först hanterar vi Pacman
-
             // Spara undan Pacmans nuvarande positione, innan vi kör
             // koden för rörelsen. Det som är nuvarande position blir
             // föregående position när Pacman väl flyttar på sig. Det är
@@ -526,6 +535,81 @@ namespace Maze2
                         ghosts[i].targetY = pacmanY;
                     }
                 }
+                else if (i == 2)
+                {
+                    if (scatter)
+                    {
+                        ghosts[i].targetX = 18;
+                        ghosts[i].targetY = 20;
+                    }
+                    else
+                    {
+                        if (pacmanDirection == _right)
+                        {
+                            ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
+                            ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
+                        }
+                        else if (pacmanDirection == _left)
+                        {
+                            ghosts[i].targetX = (pacmanX - 1 - ghosts[0].x) * 2;
+                            ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
+                        }
+                        else if (pacmanDirection == _up)
+                        {
+                            ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
+                            ghosts[i].targetY = (pacmanY - 1 - ghosts[0].y) * 2;
+                        }
+                        else if (pacmanDirection == _down)
+                        {
+                            ghosts[i].targetX = (pacmanX - ghosts[0].x) * 2;
+                            ghosts[i].targetY = (pacmanY + 1 - ghosts[0].y) * 2;
+                        }
+                    }
+                }
+                else if (i == 1)
+                {
+                    if (scatter)
+                    {
+                        ghosts[i].targetX = 0;
+                        ghosts[i].targetY = 0;
+                    }
+                    else
+                    {
+                        if (pacmanDirection == _right)
+                        {
+                            ghosts[i].targetX = pacmanX + 3;
+                            ghosts[i].targetY = pacmanY;
+                        }
+                        else if (pacmanDirection == _left)
+                        {
+                            ghosts[i].targetX = pacmanX - 3;
+                            ghosts[i].targetY = pacmanY;
+                        }
+                        else if (pacmanDirection == _up)
+                        {
+                            ghosts[i].targetX = pacmanX + 3;
+                            ghosts[i].targetY = pacmanY - 3;
+                        }
+                        else if (pacmanDirection == _down)
+                        {
+                            ghosts[i].targetX = pacmanX;
+                            ghosts[i].targetY = pacmanY + 3;
+                        }
+                    }
+                }
+                else if (i == 3)
+                {
+                    if (scatter || MathF.Sqrt((ghosts[i].targetX - (ghosts[i].x)) * (ghosts[i].targetX - (ghosts[i].x)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y)) <= 8)
+                    {
+                        ghosts[i].targetX = 0;
+                        ghosts[i].targetY = 20;
+                    }
+                    else
+                    {
+                        ghosts[i].targetX = pacmanX;
+                        ghosts[i].targetY = pacmanY;
+                    }
+                }
 
                 bool canWalkRight = maze[ghosts[i].y, ghosts[i].x + 1] != _wall && ghosts[i].direction != _left;
                 bool canWalkLeft = maze[ghosts[i].y, ghosts[i].x - 1] != _wall && ghosts[i].direction != _right;
@@ -629,7 +713,7 @@ namespace Maze2
                 // Sätt ut spöket på sin nya position
                 maze[ghosts[i].y, ghosts[i].x] = _ghost;
             }
-
+            this.Text = $"{numDots}";
             // Här tvingar vi Windows att rita om formuläret.
             // Då körs vår OnPaint-metod som ritar ut hela labyrinten 
             Invalidate();
@@ -670,9 +754,48 @@ namespace Maze2
 
         }
 
+        int scatterTimer = 0;
+ 
         private void mode_Tick(object sender, EventArgs e)
         {
-
+            if (scatterTimer == 3)
+            {
+                AddGhost(9, 7, _left, _empty, 9, 7);
+            }
+            scatterTimer++;
+            if(currentMaze == 1)
+            {
+                if(scatterTimer == 8 || scatterTimer == 35 || scatterTimer == 60 || scatterTimer == 85) 
+                {
+                    scatter = false;
+                }
+                if (scatterTimer == 28 || scatterTimer == 55 || scatterTimer == 80)
+                {
+                    scatter = true;
+                }
+            }
+            if (currentMaze >= 2 && currentMaze <= 4)
+            {
+                if (scatterTimer == 8 || scatterTimer == 35 || scatterTimer == 60)
+                {
+                    scatter = false;
+                }
+                if (scatterTimer == 28 || scatterTimer == 55)
+                {
+                    scatter = true;
+                }
+            }
+            else
+            {
+                if (scatterTimer == 6 || scatterTimer == 31 || scatterTimer == 56)
+                {
+                    scatter = false;
+                }
+                if (scatterTimer == 26 || scatterTimer == 51)
+                {
+                    scatter = true;
+                }
+            }
         }
     }
 }
