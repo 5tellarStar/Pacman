@@ -32,5 +32,9 @@ namespace Maze2
 
         public int targetX = 0;
         public int targetY = 0;
+
+        public bool frightend = false;
+
+        public bool alive = true;
     }
 }

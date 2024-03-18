@@ -13,12 +13,13 @@ namespace Maze2
         /// 2 = prick
         /// 3 = Pacman
         /// 4 = spöke
+        /// 5 = power Pill
         /// </summary>
         int[,] mazeOriginal1 =
         {
             { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
             { 1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1},
-            { 1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1},
+            { 1,5,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,5,1},
             { 1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
             { 1,2,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,2,1},
             { 1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1},
@@ -31,7 +32,7 @@ namespace Maze2
             { 1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1},
             { 1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1},
             { 1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1},
-            { 1,2,2,1,2,2,2,2,2,3,2,2,2,2,2,1,2,2,1},
+            { 1,5,2,1,2,2,2,2,2,3,2,2,2,2,2,1,2,5,1},
             { 1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1},
             { 1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1},
             { 1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1},
@@ -78,6 +79,7 @@ namespace Maze2
         const int _dot = 2;
         const int _pacman = 3;
         const int _ghost = 4;
+        const int _powerPill = 5;
 
         /// <summary>
         /// Dessa konstanter används för att hålla koll på vilken riktning
@@ -118,8 +120,7 @@ namespace Maze2
         List<Ghost> ghosts = new List<Ghost>();
 
 
-
-        bool scatter = true;
+        bool scatter = false;
         /// <summary>
         /// Spelarens poäng
         /// </summary>
@@ -197,7 +198,7 @@ namespace Maze2
                     }
 
                     // Är det en prick?
-                    if (maze[j, i] == _dot)
+                    if (maze[j, i] == _dot || maze[j, i] == _powerPill)
                     {
                         // Öka på antalet prickar i labyrinten
                         numDots++;
@@ -281,6 +282,22 @@ namespace Maze2
                             // Fyll halva blockets storlek
                             _blockSize / 2,
                             _blockSize / 2
+                            );
+                    }
+                    if (maze[j, i] == _powerPill)
+                    {
+                        g.FillEllipse(
+                            dot,
+                            // Prickarna är hälften så stora som ett block.
+                            // Vi räknar ut blocket precis som ovan
+                            // sen lägger vi till ett fjärdedels block på
+                            // positionen (det ska vara en fjärdedel på alla sidor
+                            // eftersom vi ska rita ut en prick som är ett halft block)
+                            i * _blockSize,
+                            j * _blockSize,
+                            // Fyll halva blockets storlek
+                            _blockSize,
+                            _blockSize
                             );
                     }
 
@@ -522,130 +539,177 @@ namespace Maze2
                 oldX = ghosts[i].x;
                 oldY = ghosts[i].y;
 
-                if (i == 0)
-                {
-                    if (scatter)
-                    {
-                        ghosts[i].targetX = 18;
-                        ghosts[i].targetY = 0;
-                    }
-                    else
-                    {
-                        ghosts[i].targetX = pacmanX;
-                        ghosts[i].targetY = pacmanY;
-                    }
-                }
-                else if (i == 2)
-                {
-                    if (scatter)
-                    {
-                        ghosts[i].targetX = 18;
-                        ghosts[i].targetY = 20;
-                    }
-                    else
-                    {
-                        if (pacmanDirection == _right)
-                        {
-                            ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
-                            ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
-                        }
-                        else if (pacmanDirection == _left)
-                        {
-                            ghosts[i].targetX = (pacmanX - 1 - ghosts[0].x) * 2;
-                            ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
-                        }
-                        else if (pacmanDirection == _up)
-                        {
-                            ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
-                            ghosts[i].targetY = (pacmanY - 1 - ghosts[0].y) * 2;
-                        }
-                        else if (pacmanDirection == _down)
-                        {
-                            ghosts[i].targetX = (pacmanX - ghosts[0].x) * 2;
-                            ghosts[i].targetY = (pacmanY + 1 - ghosts[0].y) * 2;
-                        }
-                    }
-                }
-                else if (i == 1)
-                {
-                    if (scatter)
-                    {
-                        ghosts[i].targetX = 0;
-                        ghosts[i].targetY = 0;
-                    }
-                    else
-                    {
-                        if (pacmanDirection == _right)
-                        {
-                            ghosts[i].targetX = pacmanX + 3;
-                            ghosts[i].targetY = pacmanY;
-                        }
-                        else if (pacmanDirection == _left)
-                        {
-                            ghosts[i].targetX = pacmanX - 3;
-                            ghosts[i].targetY = pacmanY;
-                        }
-                        else if (pacmanDirection == _up)
-                        {
-                            ghosts[i].targetX = pacmanX + 3;
-                            ghosts[i].targetY = pacmanY - 3;
-                        }
-                        else if (pacmanDirection == _down)
-                        {
-                            ghosts[i].targetX = pacmanX;
-                            ghosts[i].targetY = pacmanY + 3;
-                        }
-                    }
-                }
-                else if (i == 3)
-                {
-                    if (scatter || MathF.Sqrt((ghosts[i].targetX - (ghosts[i].x)) * (ghosts[i].targetX - (ghosts[i].x)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y)) <= 8)
-                    {
-                        ghosts[i].targetX = 0;
-                        ghosts[i].targetY = 20;
-                    }
-                    else
-                    {
-                        ghosts[i].targetX = pacmanX;
-                        ghosts[i].targetY = pacmanY;
-                    }
-                }
-
                 bool canWalkRight = maze[ghosts[i].y, ghosts[i].x + 1] != _wall && ghosts[i].direction != _left;
                 bool canWalkLeft = maze[ghosts[i].y, ghosts[i].x - 1] != _wall && ghosts[i].direction != _right;
                 bool canWalkUp = maze[ghosts[i].y - 1, ghosts[i].x] != _wall && ghosts[i].direction != _down;
                 bool canWalkDown = maze[ghosts[i].y + 1, ghosts[i].x] != _wall && ghosts[i].direction != _up;
 
-                int lengthToTargetRight = (ghosts[i].targetX - (ghosts[i].x + 1)) * (ghosts[i].targetX - (ghosts[i].x + 1)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y);
-                int lengthToTargetLeft = (ghosts[i].targetX - (ghosts[i].x - 1)) * (ghosts[i].targetX - (ghosts[i].x - 1)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y);
-                int lengthToTargetUp = (ghosts[i].targetX - ghosts[i].x) * (ghosts[i].targetX - ghosts[i].x) + (ghosts[i].targetY - (ghosts[i].y - 1)) * (ghosts[i].targetY - (ghosts[i].y - 1));
-                int lengthToTargetDown = (ghosts[i].targetX - ghosts[i].x) * (ghosts[i].targetX - ghosts[i].x) + (ghosts[i].targetY - (ghosts[i].y + 1)) * (ghosts[i].targetY - (ghosts[i].y + 1));
+                if (!ghosts[i].alive && ghosts[i].x == 9 && ghosts[i].y == 7)
+                {
+                    ghosts[i].alive = true;
+                }
 
-                if ((lengthToTargetRight < lengthToTargetLeft || !canWalkLeft) && (lengthToTargetRight < lengthToTargetUp || !canWalkUp) && (lengthToTargetRight < lengthToTargetDown || !canWalkDown) && canWalkRight)
+                if (ghosts[i].frightend)
                 {
-                    this.Text = $"right {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
-                    ghosts[i].direction = _right;
+                    Random rnd = new Random();
+                    int randomDirection = rnd.Next(0, 3);
+                    while (true)
+                    {
+                        if (canWalkRight && randomDirection == _right)
+                        {
+                            ghosts[i].direction = randomDirection;
+                            break;
+                        }
+                        if (canWalkLeft && randomDirection == _left)
+                        {
+                            ghosts[i].direction = randomDirection;
+                            break;
+                        }
+                        if (canWalkUp && randomDirection == _up)
+                        {
+                            ghosts[i].direction = randomDirection;
+                            break;
+                        }
+                        if (canWalkDown && randomDirection == _down)
+                        {
+                            ghosts[i].direction = randomDirection;
+                            break;
+                        }
+                        else
+                        {
+                            randomDirection++;
+                            randomDirection %= 4;
+                        }
+                    }
                 }
-                else if ((lengthToTargetLeft < lengthToTargetUp || !canWalkUp) && (lengthToTargetLeft < lengthToTargetDown || !canWalkDown) && (lengthToTargetLeft < lengthToTargetRight || !canWalkRight) && canWalkLeft)
+                else if (!ghosts[i].alive)
                 {
-                    this.Text = $"left {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
-                    ghosts[i].direction = _left;
-                }
-                else if ((lengthToTargetUp < lengthToTargetDown || !canWalkDown) && (lengthToTargetUp < lengthToTargetRight || !canWalkRight) && (lengthToTargetUp < lengthToTargetLeft || !canWalkLeft) && canWalkUp)
-                {
-                    this.Text = $"up {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
-                    ghosts[i].direction = _up;
-                }
-                else if ((lengthToTargetDown < lengthToTargetRight || !canWalkRight) && (lengthToTargetDown < lengthToTargetLeft || !canWalkLeft) && (lengthToTargetDown < lengthToTargetUp || !canWalkUp) && canWalkDown)
-                {
-                    this.Text = $"down {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
-                    ghosts[i].direction = _down;
+                    ghosts[i].targetX = 9;
+                    ghosts[i].targetY = 7;
+
                 }
                 else
                 {
-                    this.Text = $"no {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
-                }
+                    if (i == 0)
+                    {
+                        if (scatter)
+                        {
+                            ghosts[i].targetX = 18;
+                            ghosts[i].targetY = 0;
+                        }
+                        else
+                        {
+                            ghosts[i].targetX = pacmanX;
+                            ghosts[i].targetY = pacmanY;
+                        }
+                    }
+                    else if (i == 2)
+                    {
+                        if (scatter)
+                        {
+                            ghosts[i].targetX = 18;
+                            ghosts[i].targetY = 20;
+                        }
+                        else
+                        {
+                            if (pacmanDirection == _right)
+                            {
+                                ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
+                                ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
+                            }
+                            else if (pacmanDirection == _left)
+                            {
+                                ghosts[i].targetX = (pacmanX - 1 - ghosts[0].x) * 2;
+                                ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
+                            }
+                            else if (pacmanDirection == _up)
+                            {
+                                ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
+                                ghosts[i].targetY = (pacmanY - 1 - ghosts[0].y) * 2;
+                            }
+                            else if (pacmanDirection == _down)
+                            {
+                                ghosts[i].targetX = (pacmanX - ghosts[0].x) * 2;
+                                ghosts[i].targetY = (pacmanY + 1 - ghosts[0].y) * 2;
+                            }
+                        }
+                    }
+                    else if (i == 1)
+                    {
+                        if (scatter)
+                        {
+                            ghosts[i].targetX = 0;
+                            ghosts[i].targetY = 0;
+                        }
+                        else
+                        {
+                            if (pacmanDirection == _right)
+                            {
+                                ghosts[i].targetX = pacmanX + 3;
+                                ghosts[i].targetY = pacmanY;
+                            }
+                            else if (pacmanDirection == _left)
+                            {
+                                ghosts[i].targetX = pacmanX - 3;
+                                ghosts[i].targetY = pacmanY;
+                            }
+                            else if (pacmanDirection == _up)
+                            {
+                                ghosts[i].targetX = pacmanX + 3;
+                                ghosts[i].targetY = pacmanY - 3;
+                            }
+                            else if (pacmanDirection == _down)
+                            {
+                                ghosts[i].targetX = pacmanX;
+                                ghosts[i].targetY = pacmanY + 3;
+                            }
+                        }
+                    }
+                    else if (i == 3)
+                    {
+                        if (scatter || MathF.Sqrt((ghosts[i].targetX - (ghosts[i].x)) * (ghosts[i].targetX - (ghosts[i].x)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y)) <= 8)
+                        {
+                            ghosts[i].targetX = 0;
+                            ghosts[i].targetY = 20;
+                        }
+                        else
+                        {
+                            ghosts[i].targetX = pacmanX;
+                            ghosts[i].targetY = pacmanY;
+                        }
+                    }
 
+
+                    int lengthToTargetRight = (ghosts[i].targetX - (ghosts[i].x + 1)) * (ghosts[i].targetX - (ghosts[i].x + 1)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y);
+                    int lengthToTargetLeft = (ghosts[i].targetX - (ghosts[i].x - 1)) * (ghosts[i].targetX - (ghosts[i].x - 1)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y);
+                    int lengthToTargetUp = (ghosts[i].targetX - ghosts[i].x) * (ghosts[i].targetX - ghosts[i].x) + (ghosts[i].targetY - (ghosts[i].y - 1)) * (ghosts[i].targetY - (ghosts[i].y - 1));
+                    int lengthToTargetDown = (ghosts[i].targetX - ghosts[i].x) * (ghosts[i].targetX - ghosts[i].x) + (ghosts[i].targetY - (ghosts[i].y + 1)) * (ghosts[i].targetY - (ghosts[i].y + 1));
+
+                    if ((lengthToTargetRight < lengthToTargetLeft || !canWalkLeft) && (lengthToTargetRight < lengthToTargetUp || !canWalkUp) && (lengthToTargetRight < lengthToTargetDown || !canWalkDown) && canWalkRight)
+                    {
+                        this.Text = $"right {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
+                        ghosts[i].direction = _right;
+                    }
+                    else if ((lengthToTargetLeft < lengthToTargetUp || !canWalkUp) && (lengthToTargetLeft < lengthToTargetDown || !canWalkDown) && (lengthToTargetLeft < lengthToTargetRight || !canWalkRight) && canWalkLeft)
+                    {
+                        this.Text = $"left {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
+                        ghosts[i].direction = _left;
+                    }
+                    else if ((lengthToTargetUp < lengthToTargetDown || !canWalkDown) && (lengthToTargetUp < lengthToTargetRight || !canWalkRight) && (lengthToTargetUp < lengthToTargetLeft || !canWalkLeft) && canWalkUp)
+                    {
+                        this.Text = $"up {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
+                        ghosts[i].direction = _up;
+                    }
+                    else if ((lengthToTargetDown < lengthToTargetRight || !canWalkRight) && (lengthToTargetDown < lengthToTargetLeft || !canWalkLeft) && (lengthToTargetDown < lengthToTargetUp || !canWalkUp) && canWalkDown)
+                    {
+                        this.Text = $"down {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
+                        ghosts[i].direction = _down;
+                    }
+                    else
+                    {
+                        this.Text = $"no {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
+                    }
+                }
 
                 // Åt vilket håll är spöket på väg?
 
@@ -674,11 +738,20 @@ namespace Maze2
                 // Körde vi in i en Pacman?
                 if (maze[ghosts[i].y, ghosts[i].x] == _pacman)
                 {
+                    if (ghosts[i].alive && !ghosts[i].frightend)
+                    {
                     // Döda Pacman
                     _alive = false;
-
+                    
                     // Ta bort Pacman från labyrinten
                     maze[pacmanY, pacmanX] = _empty;
+                    }
+                    else if (ghosts[i].frightend) 
+                    {
+                        ghosts[i].alive = false;
+                        ghosts[i].frightend = false;
+                    }
+
                 }
 
                 // Har vi krockat med en vägg eller ett annat spöke?
