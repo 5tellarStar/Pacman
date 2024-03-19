@@ -119,7 +119,7 @@ namespace Maze2
         /// </summary>
         List<Ghost> ghosts = new List<Ghost>();
 
-
+        bool evenTick = true;
         bool scatter = false;
         /// <summary>
         /// Spelarens poäng
@@ -175,12 +175,11 @@ namespace Maze2
                     if (maze[j, i] == _ghost)
                     {
                         // Lägg till spöket i listan
-                        AddGhost(i, j, _noMotion, _empty, 17, 1);
+                        AddGhost(i, j, _right, _empty, 17, 1);
 
                         // Spöken lämnar alltid efter sig en prick när de
                         // startar så vi ökar antalet prickar i labyrinten
                         // för att kompensera för det
-                        numDots++;
                     }
 
                     // Är det en Pacman? (Man kan bara ha en)
@@ -234,6 +233,7 @@ namespace Maze2
             SolidBrush pinky = new SolidBrush(Color.Pink);
             SolidBrush inky = new SolidBrush(Color.LightBlue);
             SolidBrush clyde = new SolidBrush(Color.Orange);
+            SolidBrush pupill = new SolidBrush(Color.Black);
             // Här tar vi ut data om vilket fönster vi ska
             // rita i. Den här metoden skulle kunna anropas av olika
             // fönster och då behöver man kunna hantera vilket fönster
@@ -318,25 +318,55 @@ namespace Maze2
             }
             for (int i = 0; i < ghosts.Count; i++)
             {
-                if (i == 0)
+                if (ghosts[i].alive)
                 {
-                    g.FillEllipse(blinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
-                    g.FillRectangle(blinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    if (ghosts[i].frightend)
+                    {
+                        g.FillEllipse(wall, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                        g.FillRectangle(wall, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    }
+                    else if (i == 0)
+                    {
+                        g.FillEllipse(blinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                        g.FillRectangle(blinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    }
+                    else if (i == 1)
+                    {
+                        g.FillEllipse(pinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                        g.FillRectangle(pinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    }
+                    else if (i == 2)
+                    {
+                        g.FillEllipse(inky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                        g.FillRectangle(inky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    }
+                    else if (i == 3)
+                    {
+                        g.FillEllipse(clyde, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
+                        g.FillRectangle(clyde, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    }
                 }
-                if (i == 1)
+                g.FillEllipse(dot, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize / 2, _blockSize / 2);
+                g.FillEllipse(dot, ghosts[i].x * _blockSize + _blockSize / 2, ghosts[i].y * _blockSize, _blockSize / 2, _blockSize / 2);
+                if (ghosts[i].direction == _right)
                 {
-                    g.FillEllipse(pinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
-                    g.FillRectangle(pinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize / 4, ghosts[i].y * _blockSize + _blockSize / 8 , _blockSize / 4, _blockSize / 4);
+                    g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize * 3 / 4, ghosts[i].y * _blockSize + _blockSize / 8, _blockSize / 4, _blockSize / 4);
                 }
-                if (i == 2)
+                else if (ghosts[i].direction == _left)
                 {
-                    g.FillEllipse(inky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
-                    g.FillRectangle(inky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    g.FillEllipse(pupill, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 8, _blockSize / 4, _blockSize / 4);
+                    g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize / 2, ghosts[i].y * _blockSize + _blockSize / 8, _blockSize / 4, _blockSize / 4);
                 }
-                if (i == 3)
+                else if (ghosts[i].direction == _up)
                 {
-                    g.FillEllipse(clyde, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
-                    g.FillRectangle(clyde, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
+                    g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize / 8, ghosts[i].y * _blockSize, _blockSize / 4, _blockSize / 4);
+                    g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize * 5 / 8, ghosts[i].y * _blockSize, _blockSize / 4, _blockSize / 4);
+                }
+                else if (ghosts[i].direction == _down)
+                {
+                    g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize / 8, ghosts[i].y * _blockSize + _blockSize / 4, _blockSize / 4, _blockSize / 4);
+                    g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize * 5 / 8, ghosts[i].y * _blockSize + _blockSize / 4, _blockSize / 4, _blockSize / 4);
                 }
             }
         }
@@ -395,14 +425,16 @@ namespace Maze2
         /// <param name="e">Data om händelsen (inget vi bryr oss i)</param>
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if ( numDots == 121 && ghosts.Count == 2)
+            if ( numDots == 121)
             {
                 AddGhost(9, 7 , _left, _empty, 9, 7);
             }
-            if (numDots == 100 && ghosts.Count == 3)
+            if (numDots == 100)
             {
                 AddGhost(9, 7, _left, _empty, 9, 7);
             }
+
+            evenTick = !evenTick;
             // Först hanterar vi Pacman
             // Spara undan Pacmans nuvarande positione, innan vi kör
             // koden för rörelsen. Det som är nuvarande position blir
@@ -485,6 +517,16 @@ namespace Maze2
                     // Minska hur många prickar det finns i labyrinten
                     numDots--;
                 }
+                if (maze[pacmanY, pacmanX] == _powerPill)
+                {
+                    score++;
+                    numDots--;
+
+                    for (int i = 0; i < ghosts.Count; i++)
+                    {
+                        ghosts[i].frightend = ghosts[i].alive;
+                    }
+                }
 
                 // Sätt ut ett tomrum där Pacman stod förut
                 // Om Pacman flyttats tillbaka till oldX, oldY
@@ -551,46 +593,48 @@ namespace Maze2
 
                 if (ghosts[i].frightend)
                 {
-                    Random rnd = new Random();
-                    int randomDirection = rnd.Next(0, 3);
-                    while (true)
+                    if (evenTick)
                     {
-                        if (canWalkRight && randomDirection == _right)
+                        Random rnd = new Random();
+                        int randomDirection = rnd.Next(0, 3);
+                        while (true)
                         {
-                            ghosts[i].direction = randomDirection;
-                            break;
-                        }
-                        if (canWalkLeft && randomDirection == _left)
-                        {
-                            ghosts[i].direction = randomDirection;
-                            break;
-                        }
-                        if (canWalkUp && randomDirection == _up)
-                        {
-                            ghosts[i].direction = randomDirection;
-                            break;
-                        }
-                        if (canWalkDown && randomDirection == _down)
-                        {
-                            ghosts[i].direction = randomDirection;
-                            break;
-                        }
-                        else
-                        {
-                            randomDirection++;
-                            randomDirection %= 4;
+                            if (canWalkRight && randomDirection == _right)
+                            {
+                                ghosts[i].direction = randomDirection;
+                                break;
+                            }
+                            if (canWalkLeft && randomDirection == _left)
+                            {
+                                ghosts[i].direction = randomDirection;
+                                break;
+                            }
+                            if (canWalkUp && randomDirection == _up)
+                            {
+                                ghosts[i].direction = randomDirection;
+                                break;
+                            }
+                            if (canWalkDown && randomDirection == _down)
+                            {
+                                ghosts[i].direction = randomDirection;
+                                break;
+                            }
+                            else
+                            {
+                                randomDirection++;
+                                randomDirection %= 4;
+                            }
                         }
                     }
                 }
-                else if (!ghosts[i].alive)
-                {
-                    ghosts[i].targetX = 9;
-                    ghosts[i].targetY = 7;
-
-                }
                 else
                 {
-                    if (i == 0)
+                    if (!ghosts[i].alive)
+                    {
+                        ghosts[i].targetX = 9;
+                        ghosts[i].targetY = 7;
+                    }
+                    else if (i == 0)
                     {
                         if (scatter)
                         {
@@ -714,27 +758,37 @@ namespace Maze2
                 // Åt vilket håll är spöket på väg?
 
                 // Ska det åt höger?
-                if (ghosts[i].direction == _right)
+                if (!ghosts[i].frightend || (ghosts[i].frightend && evenTick))
                 {
-                    // Höger betyder att vi ökar X-positionen
-                    ghosts[i].x++;
-                }
+                    if (ghosts[i].direction == _right)
+                    {
+                        // Höger betyder att vi ökar X-positionen
+                        ghosts[i].x++;
+                    }
 
-                if (ghosts[i].direction == _down)
+                    if (ghosts[i].direction == _down)
+                    {
+                        ghosts[i].y++;
+                    }
+
+                    if (ghosts[i].direction == _left)
+                    {
+                        ghosts[i].x--;
+                    }
+
+                    if (ghosts[i].direction == _up)
+                    {
+                        ghosts[i].y--;
+                    }
+                }
+                if (ghosts[i].x == 1 && ghosts[i].y == 9)
                 {
-                    ghosts[i].y++;
+                    ghosts[i].x = 17;
                 }
-
-                if (ghosts[i].direction == _left)
+                else if (ghosts[i].x == 17 && ghosts[i].y == 9)
                 {
-                    ghosts[i].x--;
+                    ghosts[i].y = 1;
                 }
-
-                if (ghosts[i].direction == _up)
-                {
-                    ghosts[i].y--;
-                }
-
                 // Körde vi in i en Pacman?
                 if (maze[ghosts[i].y, ghosts[i].x] == _pacman)
                 {
@@ -750,11 +804,17 @@ namespace Maze2
                     {
                         ghosts[i].alive = false;
                         ghosts[i].frightend = false;
+                        if (ghosts[i].leaveBehind == _dot || ghosts[i].leaveBehind == _powerPill)
+                        {
+                            ghosts[i].leaveBehind = _empty;
+                            numDots--;
+                        }
                     }
 
                 }
 
                 // Har vi krockat med en vägg eller ett annat spöke?
+                /*
                 if (maze[ghosts[i].y, ghosts[i].x] == _wall ||
                     maze[ghosts[i].y, ghosts[i].x] == _ghost)
                 {
@@ -771,7 +831,7 @@ namespace Maze2
                     // Osv...
 
                 }
-
+                */
                 // Först av allt måste vi lägga tillbaka det som låg
                 // på spökets förra position. Annars skulle det "äta"
                 // upp saker som prickarna. leaveBehind sätt till att
@@ -781,8 +841,10 @@ namespace Maze2
 
                 // Spara undan det som ligger på spökets nya position
                 // så vi inte äter/skriver över det.
+                if (maze[ghosts[i].y, ghosts[i].x] != _pacman && maze[ghosts[i].y, ghosts[i].x] != _ghost)
+                { 
                 ghosts[i].leaveBehind = maze[ghosts[i].y, ghosts[i].x];
-
+                }
                 // Sätt ut spöket på sin nya position
                 maze[ghosts[i].y, ghosts[i].x] = _ghost;
             }
