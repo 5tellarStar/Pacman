@@ -15,7 +15,7 @@ namespace Maze2
         /// 4 = spöke
         /// 5 = power Pill
         /// </summary>
-        int[,] mazeOriginal1 =
+        int[,] mazeOriginal =
         {
             { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
             { 1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1},
@@ -54,6 +54,7 @@ namespace Maze2
 
         /// <summary>
         /// Vilken labyrint är aktiv just nu?
+        /// Svårhetsgrad
         /// </summary>
         int currentMaze = 0;
 
@@ -92,6 +93,14 @@ namespace Maze2
         const int _up = 3;
 
         /// <summary>
+        /// Konstanter för att hålla koll på vilket spöke det är
+        /// </summary>
+        const int _blinky = 0;
+        const int _pinky = 1;
+        const int _inky = 2;
+        const int _clyde = 3;
+
+        /// <summary>
         /// Pacmans X-position
         /// </summary>
         int pacmanX;
@@ -106,6 +115,9 @@ namespace Maze2
         /// </summary>
         int pacmanDirection = _noMotion;
 
+        /// <summary>
+        /// Den rikting som Pacman kommer färdas när den kan
+        /// </summary>
         int pacmanNewDirection = _noMotion;
 
         /// <summary>
@@ -119,12 +131,25 @@ namespace Maze2
         /// </summary>
         List<Ghost> ghosts = new List<Ghost>();
 
+        /// <summary>
+        /// Är det en jämn tick?
+        /// </summary>
         bool evenTick = true;
+
+        /// <summary>
+        /// Ska spökerna fly till sina hörn
+        /// </summary>
         bool scatter = false;
+
         /// <summary>
         /// Spelarens poäng
         /// </summary>
         int score = 0;
+
+        /// <summary>
+        /// Hur många spöken som ätits i rad
+        /// </summary>
+        int ghostsEaten = 0;
 
         /// <summary>
         /// Grundformuläret som vårt spel körs i
@@ -135,7 +160,7 @@ namespace Maze2
             InitializeComponent();
 
             // Lägg till de labyrinter vi har i en lista
-            mazes.Add(mazeOriginal1);
+            mazes.Add(mazeOriginal);
 
             // Kopiera över nuvarande oringallabyrint till den som 
             // ska användas i spelkoden
@@ -174,12 +199,8 @@ namespace Maze2
                     // Är det ett spöke?
                     if (maze[j, i] == _ghost)
                     {
-                        // Lägg till spöket i listan
+                        // Lägg till spöket i listan 
                         AddGhost(i, j, _right, _empty, 17, 1);
-
-                        // Spöken lämnar alltid efter sig en prick när de
-                        // startar så vi ökar antalet prickar i labyrinten
-                        // för att kompensera för det
                     }
 
                     // Är det en Pacman? (Man kan bara ha en)
@@ -205,8 +226,7 @@ namespace Maze2
                 }
             }
 
-            // Gå vidare till nästa labyrint. Det gör att nästa gång vi
-            // kör InitMaze så kommer den att använda den nya labyrinten
+            // Gå vidare till nästa labyrint
             currentMaze++;
 
             // Har vi kommit över maxantalet labyrinter? I så fall
@@ -316,25 +336,36 @@ namespace Maze2
                     }
                 }
             }
+
+            //Loop för varje spöke för att kunna få deras 
             for (int i = 0; i < ghosts.Count; i++)
             {
+
+                //Lever spöket
                 if (ghosts[i].alive)
                 {
+                    //Har spöket blivit rädd?
                     if (ghosts[i].frightend)
                     {
+                        //Ritar ett spöke blått 
                         g.FillEllipse(wall, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
                         g.FillRectangle(wall, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
                     }
-                    else if (i == 0)
+                    //Är det blinky?
+                    else if (i == _blinky)
                     {
+                        //Ritar blinky
                         g.FillEllipse(blinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
                         g.FillRectangle(blinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
                     }
-                    else if (i == 1)
+                    //Är det pinky?
+                    else if (i == _pinky)
                     {
+                        //Ritar pinky
                         g.FillEllipse(pinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
                         g.FillRectangle(pinky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
                     }
+                    //osv
                     else if (i == 2)
                     {
                         g.FillEllipse(inky, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize, _blockSize);
@@ -346,13 +377,19 @@ namespace Maze2
                         g.FillRectangle(clyde, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 2, _blockSize, _blockSize / 2);
                     }
                 }
+
+                //Ritar ögon vitorna
                 g.FillEllipse(dot, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize, _blockSize / 2, _blockSize / 2);
                 g.FillEllipse(dot, ghosts[i].x * _blockSize + _blockSize / 2, ghosts[i].y * _blockSize, _blockSize / 2, _blockSize / 2);
+
+                //Kollar spöket åt höger
                 if (ghosts[i].direction == _right)
                 {
+                    //Ritar pupiller som kollar höger
                     g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize / 4, ghosts[i].y * _blockSize + _blockSize / 8 , _blockSize / 4, _blockSize / 4);
                     g.FillEllipse(pupill, ghosts[i].x * _blockSize + _blockSize * 3 / 4, ghosts[i].y * _blockSize + _blockSize / 8, _blockSize / 4, _blockSize / 4);
                 }
+                //osv
                 else if (ghosts[i].direction == _left)
                 {
                     g.FillEllipse(pupill, ghosts[i].x * _blockSize, ghosts[i].y * _blockSize + _blockSize / 8, _blockSize / 4, _blockSize / 4);
@@ -384,26 +421,22 @@ namespace Maze2
                 return;
             }
 
-            // Vi utgår från att Pacman står stilla
-            // Om ingen av de korrekta tangenttesterna triggas,
-            // så gäller detta och Pacman står stilla. Om någon
-            // av testerna triggas skrivs _noMotion över
-            // riktnignen
-
-
             // Vi kör WASD-styrning. 
+            // Är D nedtryckt?
+            if (e.KeyCode == Keys.D || pacmanNewDirection == _right)
+            {
+                //Sätter pacmans nya rikting åt höger
+                pacmanNewDirection = _right;
+            }
+
             // Är A nedtryckt?
             if (e.KeyCode == Keys.A || pacmanNewDirection == _left)
             {
+                //Sätter pacmans nya rikting åt vänster
                 pacmanNewDirection = _left;
             }
 
-            if (e.KeyCode == Keys.D || pacmanNewDirection == _right)
-            {
-                pacmanNewDirection = _right;
-
-            }
-
+            //osv
             if (e.KeyCode == Keys.W || pacmanNewDirection == _up)
             {
                 pacmanNewDirection = _up;
@@ -419,20 +452,24 @@ namespace Maze2
         /// Denna körs med jämna mellanrum så att allt i spelet
         /// uppdateras samtidigt och med samma intervall
         /// Det är timer-komponenten i vårt formulär som gör att koden
-        /// körs varje gång den räknat 100 ms
+        /// körs varje gång den räknat 500 ms
         /// </summary>
         /// <param name="sender">Vad orsakade händelsen? (Timer1)</param>
         /// <param name="e">Data om händelsen (inget vi bryr oss i)</param>
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if ( numDots == 121)
+            //Är det dags för att ett nytt spöke ska komma utt?
+            //Tredje spöket kommer ut när det är 121 prickar kvar 
+            if (numDots == 121)
             {
                 AddGhost(9, 7 , _left, _empty, 9, 7);
             }
+            //Fjärde spöket kommer ut när det är 100 prickar kvar
             if (numDots == 100)
             {
                 AddGhost(9, 7, _left, _empty, 9, 7);
             }
+
 
             evenTick = !evenTick;
             // Först hanterar vi Pacman
@@ -512,19 +549,104 @@ namespace Maze2
                 {
                     // En prick!
                     // Öka poängen
-                    score++;
+                    score += 10;
 
                     // Minska hur många prickar det finns i labyrinten
                     numDots--;
                 }
                 if (maze[pacmanY, pacmanX] == _powerPill)
                 {
-                    score++;
+                    score += 50;
+                    ghostsEaten = 0;
                     numDots--;
 
                     for (int i = 0; i < ghosts.Count; i++)
                     {
-                        ghosts[i].frightend = ghosts[i].alive;
+                        if (ghosts[i].alive)
+                        {
+                            ghosts[i].frightend = true;
+
+                            if (currentMaze == 0)
+                            {
+                                ghosts[i].frightendTimer = 12;
+                            }
+                            if (currentMaze == 1)
+                            {
+                                ghosts[i].frightendTimer = 12;
+                            }
+                            if (currentMaze == 2)
+                            {
+                                ghosts[i].frightendTimer = 10;
+                            }
+                            if (currentMaze == 3)
+                            {
+                                ghosts[i].frightendTimer = 8;
+                            }
+                            if (currentMaze == 4)
+                            {
+                                ghosts[i].frightendTimer = 6;
+                            }
+                            if (currentMaze == 5)
+                            {
+                                ghosts[i].frightendTimer = 4;
+                            }
+                            if (currentMaze == 6)
+                            {
+                                ghosts[i].frightendTimer = 10;
+                            }
+                            if (currentMaze == 7)
+                            {
+                                ghosts[i].frightendTimer = 4;
+                            }
+                            if (currentMaze == 8)
+                            {
+                                ghosts[i].frightendTimer = 4;
+                            }
+                            if (currentMaze == 9)
+                            {
+                                ghosts[i].frightendTimer = 2;
+                            }
+                            if (currentMaze == 10)
+                            {
+                                ghosts[i].frightendTimer = 10;
+                            }
+                            if (currentMaze == 11)
+                            {
+                                ghosts[i].frightendTimer = 4;
+                            }
+                            if (currentMaze == 12)
+                            {
+                                ghosts[i].frightendTimer = 2;
+                            }
+                            if (currentMaze == 13)
+                            {
+                                ghosts[i].frightendTimer = 2;
+                            }
+                            if (currentMaze == 14)
+                            {
+                                ghosts[i].frightendTimer = 6;
+                            }
+                            if (currentMaze == 15)
+                            {
+                                ghosts[i].frightendTimer = 2;
+                            }
+                            if (currentMaze == 16)
+                            {
+                                ghosts[i].frightendTimer = 2;
+                            }
+                            if (currentMaze == 17)
+                            {
+                                ghosts[i].frightendTimer = 0;
+                            }
+                            if (currentMaze == 18)
+                            {
+                                ghosts[i].frightendTimer = 2;
+                            }
+                            if (currentMaze >= 19)
+                            {
+                                ghosts[i].frightendTimer = 0;
+                            }
+                        }
                     }
                 }
 
@@ -578,6 +700,15 @@ namespace Maze2
                 // Spara undan nuvarande position. Precis som i fallet
                 // med Pacman så vill vi kunna flytta tillbaka spöket
                 // om det kolliderar med något
+                if (ghosts[i].frightendTimer == 0)
+                {
+                    ghosts[i].frightend = false;
+                }
+                else
+                {
+                    ghosts[i].frightendTimer--;
+                }
+
                 oldX = ghosts[i].x;
                 oldY = ghosts[i].y;
 
@@ -731,27 +862,19 @@ namespace Maze2
 
                     if ((lengthToTargetRight < lengthToTargetLeft || !canWalkLeft) && (lengthToTargetRight < lengthToTargetUp || !canWalkUp) && (lengthToTargetRight < lengthToTargetDown || !canWalkDown) && canWalkRight)
                     {
-                        this.Text = $"right {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
                         ghosts[i].direction = _right;
                     }
                     else if ((lengthToTargetLeft < lengthToTargetUp || !canWalkUp) && (lengthToTargetLeft < lengthToTargetDown || !canWalkDown) && (lengthToTargetLeft < lengthToTargetRight || !canWalkRight) && canWalkLeft)
                     {
-                        this.Text = $"left {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
                         ghosts[i].direction = _left;
                     }
                     else if ((lengthToTargetUp < lengthToTargetDown || !canWalkDown) && (lengthToTargetUp < lengthToTargetRight || !canWalkRight) && (lengthToTargetUp < lengthToTargetLeft || !canWalkLeft) && canWalkUp)
                     {
-                        this.Text = $"up {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
                         ghosts[i].direction = _up;
                     }
                     else if ((lengthToTargetDown < lengthToTargetRight || !canWalkRight) && (lengthToTargetDown < lengthToTargetLeft || !canWalkLeft) && (lengthToTargetDown < lengthToTargetUp || !canWalkUp) && canWalkDown)
                     {
-                        this.Text = $"down {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
                         ghosts[i].direction = _down;
-                    }
-                    else
-                    {
-                        this.Text = $"no {canWalkRight} {canWalkLeft} {canWalkUp} {canWalkDown}";
                     }
                 }
 
@@ -804,6 +927,8 @@ namespace Maze2
                     {
                         ghosts[i].alive = false;
                         ghosts[i].frightend = false;
+                        ghostsEaten++;
+                        score += 100 * 2 ^ ghostsEaten;
                         if (ghosts[i].leaveBehind == _dot || ghosts[i].leaveBehind == _powerPill)
                         {
                             ghosts[i].leaveBehind = _empty;
@@ -813,25 +938,14 @@ namespace Maze2
 
                 }
 
-                // Har vi krockat med en vägg eller ett annat spöke?
-                /*
-                if (maze[ghosts[i].y, ghosts[i].x] == _wall ||
-                    maze[ghosts[i].y, ghosts[i].x] == _ghost)
+                // Har vi krockat med en vägg för någonting i AI går sönder ibland?
+                if (maze[ghosts[i].y, ghosts[i].x] == _wall)
                 {
-                    // Flytta tillbaka spöket till den tidigare
-                    // positionen
+                    // Flytta tillbaka spöket till den tidigare positionen
                     ghosts[i].x = oldX;
                     ghosts[i].y = oldY;
-
-                    // Öka i vilken riktning spöket ska gå.
-                    // Spöket kan röra sig i rikningarna som vi angav
-                    // som konstanter i början av koden. Dvs, _right = 0,
-                    // osv. Om spöket var på väg åt höger så ökar vi riktningen
-                    // då blir den 1, vilket betyder att den ska gå neråt
-                    // Osv...
-
                 }
-                */
+                
                 // Först av allt måste vi lägga tillbaka det som låg
                 // på spökets förra position. Annars skulle det "äta"
                 // upp saker som prickarna. leaveBehind sätt till att
@@ -841,14 +955,14 @@ namespace Maze2
 
                 // Spara undan det som ligger på spökets nya position
                 // så vi inte äter/skriver över det.
-                if (maze[ghosts[i].y, ghosts[i].x] != _pacman && maze[ghosts[i].y, ghosts[i].x] != _ghost)
+                if (maze[ghosts[i].y, ghosts[i].x] != _pacman)
                 { 
                 ghosts[i].leaveBehind = maze[ghosts[i].y, ghosts[i].x];
                 }
                 // Sätt ut spöket på sin nya position
                 maze[ghosts[i].y, ghosts[i].x] = _ghost;
             }
-            this.Text = $"{numDots}";
+            this.Text = $"{score}";
             // Här tvingar vi Windows att rita om formuläret.
             // Då körs vår OnPaint-metod som ritar ut hela labyrinten 
             Invalidate();
