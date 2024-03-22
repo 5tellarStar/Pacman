@@ -142,6 +142,11 @@ namespace Maze2
         bool scatter = false;
 
         /// <summary>
+        /// Timern för när spökerna ska fly
+        /// </summary>
+        int scatterTimer = 0;
+
+        /// <summary>
         /// Spelarens poäng
         /// </summary>
         int score = 0;
@@ -512,25 +517,22 @@ namespace Maze2
             if (_alive)
             {
 
-                // Vilken riktning har vi fått från keydown?
+                // Vilken rikting kollar Pacman åt
                 if (pacmanDirection == _left)
                 {
                     // För att gå vänster minskar vi på X-positionen
                     pacmanX--;
                 }
-
                 if (pacmanDirection == _right)
                 {
                     // För att gå vänster ökar vi på X-positionen
                     pacmanX++;
                 }
-
                 if (pacmanDirection == _up)
                 {
                     // För att gå upp minskar vi på Y-positionen
                     pacmanY--;
                 }
-
                 if (pacmanDirection == _down)
                 {
                     // För att gå ned ökar vi på Y-positionen
@@ -558,12 +560,21 @@ namespace Maze2
                     // Minska hur många prickar det finns i labyrinten
                     numDots--;
                 }
+
+                // Ligger det en prick dit Pacman rör sig?
                 if (maze[pacmanY, pacmanX] == _powerPill)
                 {
+                    // Ett Power Pill!
+                    // Öka poängen
                     score += 50;
+
+                    // sätt spöken ätna i rad till 0
                     ghostsEaten = 0;
+
+                    // Minska hur många prickar det finns i labyrinten
                     numDots--;
 
+                    // Gör varje levande spöke rädd och sätter hur länge den ska vara rädd baserat på riktiga Pacman
                     for (int i = 0; i < ghosts.Count; i++)
                     {
                         if (ghosts[i].alive)
@@ -666,6 +677,8 @@ namespace Maze2
                 // kom från om han flyttades tillbaka pga att
                 // han krockade med en vägg.
 
+                //Är Pacman i någon av tunnlarna?
+                //flyttar Pacman till den andra tunnlen
                 if (pacmanX == 1 && pacmanY == 9)
                 {
                     pacmanX = 17;
@@ -675,12 +688,8 @@ namespace Maze2
                     pacmanX = 1;
                 }
 
-
-
+                // Flyttar Pacman till Pacman
                 maze[pacmanY, pacmanX] = _pacman;
-
-                // Visa den nya poängen
-
 
                 // Om antalet prickar blivit noll, så är det dags
                 // för nästa labyrint
@@ -701,39 +710,52 @@ namespace Maze2
             // vi går vidare till nästa
             for (int i = 0; i < ghosts.Count; i++)
             {
-                // Spara undan nuvarande position. Precis som i fallet
-                // med Pacman så vill vi kunna flytta tillbaka spöket
-                // om det kolliderar med något
+                // Kollar om det är dags för att spöket ska bli orädd
                 if (ghosts[i].frightendTimer == 0)
                 {
+                    // Gör spöket orädd
                     ghosts[i].frightend = false;
                 }
                 else
                 {
+                    // om inte så räknar vi ner rädsel timern
                     ghosts[i].frightendTimer--;
                 }
 
+                // Spara undan nuvarande position. Precis som i fallet
+                // med Pacman så vill vi kunna flytta tillbaka spöket
+                // om det kolliderar med något
                 oldX = ghosts[i].x;
                 oldY = ghosts[i].y;
 
+                // Sparar vilka håll spöket kan gå
                 bool canWalkRight = maze[ghosts[i].y, ghosts[i].x + 1] != _wall && ghosts[i].direction != _left;
                 bool canWalkLeft = maze[ghosts[i].y, ghosts[i].x - 1] != _wall && ghosts[i].direction != _right;
                 bool canWalkUp = maze[ghosts[i].y - 1, ghosts[i].x] != _wall && ghosts[i].direction != _down;
                 bool canWalkDown = maze[ghosts[i].y + 1, ghosts[i].x] != _wall && ghosts[i].direction != _up;
 
+                // Om ett dött spöke har kommit tillbaka till spökhuset så blir det levande igen
                 if (!ghosts[i].alive && ghosts[i].x == 9 && ghosts[i].y == 7)
                 {
                     ghosts[i].alive = true;
                 }
 
+                //Kollar om spöket är rädd
                 if (ghosts[i].frightend)
                 {
+                    // Är det en jämn tick?
+                    // Detta gör vi för att spöket ska vara saktare
                     if (evenTick)
                     {
+                        //Väljer en slumpmässig rikting
                         Random rnd = new Random();
                         int randomDirection = rnd.Next(0, 3);
+
+                        // fortsätter försöka gå åt ett håll tills det går
                         while (true)
                         {
+                            // Kollar om spöket kan gå åt det slumpmässiga
+                            // och går åt det hållet
                             if (canWalkRight && randomDirection == _right)
                             {
                                 ghosts[i].direction = randomDirection;
@@ -756,6 +778,7 @@ namespace Maze2
                             }
                             else
                             {
+                                //byter håll om det inte gick att gå åt det hållet 
                                 randomDirection++;
                                 randomDirection %= 4;
                             }
@@ -764,53 +787,27 @@ namespace Maze2
                 }
                 else
                 {
+                    // kollar var spöket ska sikta
                     if (!ghosts[i].alive)
                     {
+                        // när spöket är dött ska det ta sig hem för att leva igen
                         ghosts[i].targetX = 9;
                         ghosts[i].targetY = 7;
                     }
                     else if (i == 0)
                     {
+                        //ska spöket fly?
                         if (scatter)
                         {
+                            //flyr till sitt hörn
                             ghosts[i].targetX = 18;
                             ghosts[i].targetY = 0;
                         }
                         else
                         {
+                            // spöke 0 går direkt mot Pacman
                             ghosts[i].targetX = pacmanX;
                             ghosts[i].targetY = pacmanY;
-                        }
-                    }
-                    else if (i == 2)
-                    {
-                        if (scatter)
-                        {
-                            ghosts[i].targetX = 18;
-                            ghosts[i].targetY = 20;
-                        }
-                        else
-                        {
-                            if (pacmanDirection == _right)
-                            {
-                                ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
-                                ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
-                            }
-                            else if (pacmanDirection == _left)
-                            {
-                                ghosts[i].targetX = (pacmanX - 1 - ghosts[0].x) * 2;
-                                ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
-                            }
-                            else if (pacmanDirection == _up)
-                            {
-                                ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
-                                ghosts[i].targetY = (pacmanY - 1 - ghosts[0].y) * 2;
-                            }
-                            else if (pacmanDirection == _down)
-                            {
-                                ghosts[i].targetX = (pacmanX - ghosts[0].x) * 2;
-                                ghosts[i].targetY = (pacmanY + 1 - ghosts[0].y) * 2;
-                            }
                         }
                     }
                     else if (i == 1)
@@ -822,6 +819,7 @@ namespace Maze2
                         }
                         else
                         {
+                            // spöke 1 går lite framför Pacman
                             if (pacmanDirection == _right)
                             {
                                 ghosts[i].targetX = pacmanX + 3;
@@ -844,8 +842,41 @@ namespace Maze2
                             }
                         }
                     }
+                    else if (i == 2)
+                    {
+                        if (scatter)
+                        {
+                            ghosts[i].targetX = 18;
+                            ghosts[i].targetY = 20;
+                        }
+                        else
+                        {
+                            // spöke 2 ska komma från andra hållet som spöke 0
+                            if (pacmanDirection == _right)
+                            {
+                                ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
+                                ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
+                            }
+                            else if (pacmanDirection == _left)
+                            {
+                                ghosts[i].targetX = (pacmanX - 1 - ghosts[0].x) * 2;
+                                ghosts[i].targetY = (pacmanY - ghosts[0].y * 2) * 2;
+                            }
+                            else if (pacmanDirection == _up)
+                            {
+                                ghosts[i].targetX = (pacmanX + 1 - ghosts[0].x) * 2;
+                                ghosts[i].targetY = (pacmanY - 1 - ghosts[0].y) * 2;
+                            }
+                            else if (pacmanDirection == _down)
+                            {
+                                ghosts[i].targetX = (pacmanX - ghosts[0].x) * 2;
+                                ghosts[i].targetY = (pacmanY + 1 - ghosts[0].y) * 2;
+                            }
+                        }
+                    }
                     else if (i == 3)
                     {
+                        // spöke 3 flyr om den är inom 8 tiles annars går den rakt mot Pacman
                         if (scatter || MathF.Sqrt((ghosts[i].targetX - (ghosts[i].x)) * (ghosts[i].targetX - (ghosts[i].x)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y)) <= 8)
                         {
                             ghosts[i].targetX = 0;
@@ -858,12 +889,13 @@ namespace Maze2
                         }
                     }
 
-
+                    //spara hur långt det är till målet från där spöket kommer vara om det går åt det hållet
                     int lengthToTargetRight = (ghosts[i].targetX - (ghosts[i].x + 1)) * (ghosts[i].targetX - (ghosts[i].x + 1)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y);
                     int lengthToTargetLeft = (ghosts[i].targetX - (ghosts[i].x - 1)) * (ghosts[i].targetX - (ghosts[i].x - 1)) + (ghosts[i].targetY - ghosts[i].y) * (ghosts[i].targetY - ghosts[i].y);
                     int lengthToTargetUp = (ghosts[i].targetX - ghosts[i].x) * (ghosts[i].targetX - ghosts[i].x) + (ghosts[i].targetY - (ghosts[i].y - 1)) * (ghosts[i].targetY - (ghosts[i].y - 1));
                     int lengthToTargetDown = (ghosts[i].targetX - ghosts[i].x) * (ghosts[i].targetX - ghosts[i].x) + (ghosts[i].targetY - (ghosts[i].y + 1)) * (ghosts[i].targetY - (ghosts[i].y + 1));
 
+                    // kollar vilket håll är bäst att gå åt
                     if ((lengthToTargetRight < lengthToTargetLeft || !canWalkLeft) && (lengthToTargetRight < lengthToTargetUp || !canWalkUp) && (lengthToTargetRight < lengthToTargetDown || !canWalkDown) && canWalkRight)
                     {
                         ghosts[i].direction = _right;
@@ -908,6 +940,7 @@ namespace Maze2
                         ghosts[i].y--;
                     }
                 }
+                // Är spöket i en tunnel går den igenom den 
                 if (ghosts[i].x == 1 && ghosts[i].y == 9)
                 {
                     ghosts[i].x = 17;
@@ -916,6 +949,7 @@ namespace Maze2
                 {
                     ghosts[i].y = 1;
                 }
+
                 // Körde vi in i en Pacman?
                 if (maze[ghosts[i].y, ghosts[i].x] == _pacman)
                 {
@@ -966,7 +1000,10 @@ namespace Maze2
                 // Sätt ut spöket på sin nya position
                 maze[ghosts[i].y, ghosts[i].x] = _ghost;
             }
+
+            // skriver ut score
             this.Text = $"{score}";
+
             // Här tvingar vi Windows att rita om formuläret.
             // Då körs vår OnPaint-metod som ritar ut hela labyrinten 
             Invalidate();
@@ -1000,22 +1037,24 @@ namespace Maze2
             ghosts[lastGhost].targetY = targetY;
         }
 
-        // När vi släpper upp en tangent ska Pacman sluta röra sig
-        // Det här skulle nog kunna göras bättre, men...
+
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
 
         }
 
-        int scatterTimer = 0;
- 
+        /// <summary>
+        /// Gör alla saker som har med längre tider att göra.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void mode_Tick(object sender, EventArgs e)
         {
+            scatterTimer++;
             if (scatterTimer == 3)
             {
                 AddGhost(9, 7, _left, _empty, 9, 7);
             }
-            scatterTimer++;
             if(currentMaze == 1)
             {
                 if(scatterTimer == 8 || scatterTimer == 35 || scatterTimer == 60 || scatterTimer == 85) 
