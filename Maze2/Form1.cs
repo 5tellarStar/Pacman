@@ -470,26 +470,22 @@ namespace Maze2
                 AddGhost(9, 7, _left, _empty, 9, 7);
             }
 
-
+            //Kollar om det är jämn tick
             evenTick = !evenTick;
-            // Först hanterar vi Pacman
-            // Spara undan Pacmans nuvarande positione, innan vi kör
-            // koden för rörelsen. Det som är nuvarande position blir
-            // föregående position när Pacman väl flyttar på sig. Det är
-            // alltså därför det heter oldX/oldY.
-            // Om något stoppar Pacman från att röra sig, såsom en vägg,
-            // kommer vi att flytta tillbaka Pacman tillbaka Pacman till
-            // denna position. För vi vet ju att den föregående positionen
+
+            // kollar om spelaren har tryckt vänster och om det går att gå åt vänster
             if (pacmanNewDirection == _left && maze[pacmanY, pacmanX - 1] != _wall)
             {
                 pacmanDirection = _left;
             }
 
+            // kollar om spelaren har tryckt höger och om det går att gå åt höger
             if (pacmanNewDirection == _right && maze[pacmanY, pacmanX + 1] != _wall)
             {
                 pacmanDirection = _right;
             }
 
+            //osv
             if (pacmanNewDirection == _up && maze[pacmanY - 1, pacmanX] != _wall)
             {
                 pacmanDirection = _up;
@@ -499,6 +495,14 @@ namespace Maze2
             {
                 pacmanDirection = _down;
             }
+
+            // Spara undan Pacmans nuvarande positione, innan vi kör
+            // koden för rörelsen. Det som är nuvarande position blir
+            // föregående position när Pacman väl flyttar på sig. Det är
+            // alltså därför det heter oldX/oldY.
+            // Om något stoppar Pacman från att röra sig, såsom en vägg,
+            // kommer vi att flytta tillbaka Pacman tillbaka Pacman till
+            // denna position. För vi vet ju att den föregående positionen
             // var OK och inte blockerad på någotvis.
             int oldX = pacmanX;
             int oldY = pacmanY;
